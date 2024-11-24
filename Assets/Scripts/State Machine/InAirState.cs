@@ -6,6 +6,8 @@ public class InAirState : BaseState
 {
     //timeout deltatime
     private float fallTimeoutDelta;
+    private float minAirTime = 0.1f; // Minimum time to stay in air, this is needed because sometimes the character goes back to GroundState before jumping because it still touching the ground layer
+    private float airTime;
 
     public InAirState(StateMachine currentContext, StateFactory stateFactory) : base(currentContext, stateFactory)
     {
@@ -38,13 +40,13 @@ public class InAirState : BaseState
                 ctx.Animator.SetBool(ctx.AnimIDFreeFall, true);
             }
         }
-
+        airTime += Time.deltaTime; // Increment air time
         CheckSwitchStates();
     }
 
     public override void ExitState()
     {
-        Debug.Log("In Air State Exit");
+        // Debug.Log("In Air State Exit");
         // reset the fall timeout timer
         fallTimeoutDelta = ctx.FallTimeout;
 
@@ -58,7 +60,7 @@ public class InAirState : BaseState
 
     public override void CheckSwitchStates()
     {
-        if (ctx.Grounded)
+        if (ctx.Grounded && airTime > minAirTime)
         {
             SwitchState(factory.GroundedState());
         }
